@@ -1,5 +1,6 @@
 package com.example.a12481.coolweather;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +54,7 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView comfortText;
     private TextView carWashText;
     private TextView sportText;
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +79,7 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText =(TextView)findViewById(R.id.car_wash_text);
         sportText =(TextView)findViewById(R.id.sport_text);
         swipeRefresh = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeColors(R.color.colorPrimary);
         navButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,7 +103,6 @@ public class WeatherActivity extends AppCompatActivity {
         }else
         {
             mWeatherId =getIntent().getStringExtra("weather_id");
-            String weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.VISIBLE);
             requestWeather(mWeatherId);
         }
@@ -111,7 +114,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
     public void requestWeather(final String weatherId){
-        String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId+"&key=bc0418b57b2d4918819d3974ac1285d9";
+        String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId+"&key=fb80e3339f71492cb8e9227a3e9a346b";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -128,6 +131,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
+                Log.d("nini", "onResponse: "+responseText);
                 final Weather weather = Utility.handleWeatherResponse(responseText);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -140,11 +144,13 @@ public class WeatherActivity extends AppCompatActivity {
                             showWeatherInfo(weather);
                         }
                         else{
-                            Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+
+                            Toast.makeText(WeatherActivity.this,"获取天气信息失败!!!!!",Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
-                swipeRefresh.setRefreshing(false);
+
             }
         });
         loadBingPic();
